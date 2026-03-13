@@ -1,0 +1,209 @@
+/*
+  File overview:
+  This stylesheet defines the layout and visual design for the Todo List
+  evaluation app. It focuses on creating a clean two-column layout with
+  clearly styled buttons, while staying framework-agnostic (plain CSS).
+*/
+
+/* Global reset and base typography */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: #f5f6fa;
+  color: #222;
+}
+
+/* Header area styling */
+.app-header {
+  padding: 1.5rem 1rem;
+  background: linear-gradient(135deg, #4c6fff, #8b5cf6);
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.app-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Main content layout */
+.app-main {
+  max-width: 960px;
+  margin: 1.5rem auto 2rem;
+  padding: 0 1rem;
+}
+
+/* New-todo input section */
+.input-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+}
+
+.todo-input {
+  flex: 1 1 220px;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5f5;
+  font-size: 0.95rem;
+}
+
+.todo-input:focus {
+  outline: none;
+  border-color: #4c6fff;
+  box-shadow: 0 0 0 2px rgba(76, 111, 255, 0.18);
+}
+
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: background 0.15s ease, transform 0.05s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.btn-primary {
+  background: #4c6fff;
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(76, 111, 255, 0.4);
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: #fff;
+}
+
+.btn-icon {
+  padding-inline: 0.45rem;
+  min-width: 2.1rem;
+  justify-content: center;
+}
+
+.feedback-message {
+  flex-basis: 100%;
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #ef4444;
+}
+
+.feedback-message--success {
+  color: #16a34a;
+}
+
+/* Two-column list layout */
+.lists-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.list-column {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem 0.9rem;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+}
+
+.list-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.35rem;
+}
+
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+/* Individual todo items */
+.todo-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.todo-item:last-child {
+  border-bottom: none;
+}
+
+.todo-text {
+  font-size: 0.9rem;
+}
+
+.todo-text--completed {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+.todo-actions {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+/* Arrow buttons visually indicate moving between lists */
+.arrow-complete {
+  background: #10b981;
+  color: #fff;
+}
+
+.arrow-pending {
+  background: #f59e0b;
+  color: #fff;
+}
+
+/* Simple edit mode styles */
+.todo-edit-input {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  border: 1px solid #cbd5f5;
+}
+
+/* Small helper class for muted text such as loading indicators */
+.text-muted {
+  font-size: 0.8rem;
+  color: #6b7280;
+}

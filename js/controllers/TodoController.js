@@ -1,0 +1,114 @@
+/**
+ * File overview:
+ * The TodoController class wires the view and model together.
+ * It:
+ *   - Subscribes to model changes so that the view can render the
+ *     latest list of todos whenever data changes.
+ *   - Subscribes to view events (add, toggle, delete, edit) and calls
+ *     the appropriate model functions.
+ *   - Handles basic validation and user-facing feedback messages.
+ */
+
+export class TodoController {
+  /**
+   * @param {import("../models/TodoModel.js").TodoModel} model
+   * @param {import("../views/TodoView.js").TodoView} view
+   */
+  constructor(model, view) {
+    this.model = model;
+    this.view = view;
+
+    // Every time the model's todo list changes, ask the view to render.
+    this.model.subscribe((todos) => {
+      this.view.renderTodos(todos);
+    });
+
+    // Initial render using whatever the model currently has loaded.
+    this.view.renderTodos(this.model.getTodos());
+
+    // Wire view events to controller methods.
+    this.view.bindAddTodo(this.handleAddTodo.bind(this));
+    this.view.bindToggleTodo(this.handleToggleTodo.bind(this));
+    this.view.bindDeleteTodo(this.handleDeleteTodo.bind(this));
+    this.view.bindEditTodo(this.handleEditTodo.bind(this));
+  }
+
+  /**
+   * Handles the "add" flow:
+   *   - Validates input.
+   *   - Asks the model to add the new todo.
+   *   - Clears the form and shows success or error feedback.
+   *
+   * @param {string} text
+   */
+  async handleAddTodo(text) {
+    if (!text.trim()) {
+      this.view.showMessage("Please enter a task description.", "error");
+      return;
+    }
+
+    try {
+      await this.model.addTodo(text.trim());
+      this.view.clearInput();
+      this.view.showMessage("Task added successfully.", "success");
+    } catch (error) {
+      this.view.showMessage(
+        "Unable to add task. Please try again.",
+        "error"
+      );
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }
+
+  /**
+   * Handles moving a todo between "pending" and "completed".
+   *
+   * @param {number} id
+   */
+  async handleToggleTodo(id) {
+    try {
+      await this.model.toggleTodoCompletion(id);
+    } catch (error) {
+      this.view.showMessage(
+        "Unable to update completion status.",
+        "error"
+      );
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }
+
+  /**
+   * Handles removal of a todo from the list.
+   *
+   * @param {number} id
+   */
+  async handleDeleteTodo(id) {
+    try {
+      await this.model.deleteTodo(id);
+      this.view.showMessage("Task deleted.", "success");
+    } catch (error) {
+      this.view.showMessage("Unable to delete task.", "error");
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }
+
+  /**
+   * Handles persisting edited task text.
+   *
+   * @param {number} id
+   * @param {string} newText
+   */
+  async handleEditTodo(id, newText) {
+    try {
+      await this.model.editTodo(id, newText);
+      this.view.showMessage("Task updated.", "success");
+    } catch (error) {
+      this.view.showMessage("Unable to update task.", "error");
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }
+}
