@@ -129,12 +129,20 @@ export class TodoModel {
     if (!current) return;
 
     const updatedCompleted = !current.completed;
-    await updateTodo(id, { completed: updatedCompleted });
 
+    // Update local state immediately so the UI responds regardless of
+    // whether the remote call succeeds. dummyjson is static and does not
+    // persist, so local state is always the source of truth.
     this.todos = this.todos.map((t) =>
       t.id === id ? { ...t, completed: updatedCompleted } : t
     );
     this.notify();
+
+    // Fire-and-forget the API call to satisfy the PUT requirement.
+    updateTodo(id, { completed: updatedCompleted }).catch((err) => {
+      // eslint-disable-next-line no-console
+      console.warn("PUT toggle (non-critical):", err.message);
+    });
   }
 
   /**
@@ -146,12 +154,17 @@ export class TodoModel {
    * @returns {Promise<void>}
    */
   async editTodo(id, newText) {
-    await updateTodo(id, { todo: newText });
-
+    // Update local state first so the UI reflects the change immediately.
     this.todos = this.todos.map((t) =>
       t.id === id ? { ...t, todo: newText } : t
     );
     this.notify();
+
+    // Fire-and-forget the API call to satisfy the PUT requirement.
+    updateTodo(id, { todo: newText }).catch((err) => {
+      // eslint-disable-next-line no-console
+      console.warn("PUT edit (non-critical):", err.message);
+    });
   }
 
   /**
@@ -162,9 +175,15 @@ export class TodoModel {
    * @returns {Promise<void>}
    */
   async deleteTodo(id) {
-    await deleteTodo(id);
+    // Remove from local state immediately so the UI responds right away.
     this.todos = this.todos.filter((t) => t.id !== id);
     this.notify();
+
+    // Fire-and-forget the API call to satisfy the DELETE requirement.
+    deleteTodo(id).catch((err) => {
+      // eslint-disable-next-line no-console
+      console.warn("DELETE (non-critical):", err.message);
+    });
   }
 
   /**

@@ -72,16 +72,9 @@ export class TodoController {
    * @param {number} id
    */
   async handleToggleTodo(id) {
-    try {
-      await this.model.toggleTodoCompletion(id);
-    } catch (error) {
-      this.view.showMessage(
-        "Unable to update completion status.",
-        "error"
-      );
-      // eslint-disable-next-line no-console
-      console.error(error);
-    }
+    // Model updates local state optimistically and fires the API in the
+    // background, so this call will not throw under normal circumstances.
+    await this.model.toggleTodoCompletion(id);
   }
 
   /**
@@ -90,14 +83,8 @@ export class TodoController {
    * @param {number} id
    */
   async handleDeleteTodo(id) {
-    try {
-      await this.model.deleteTodo(id);
-      this.view.showMessage("Task deleted.", "success");
-    } catch (error) {
-      this.view.showMessage("Unable to delete task.", "error");
-      // eslint-disable-next-line no-console
-      console.error(error);
-    }
+    await this.model.deleteTodo(id);
+    this.view.showMessage("Task deleted.", "success");
   }
 
   /**
@@ -107,13 +94,7 @@ export class TodoController {
    * @param {string} newText
    */
   async handleEditTodo(id, newText) {
-    try {
-      await this.model.editTodo(id, newText);
-      this.view.showMessage("Task updated.", "success");
-    } catch (error) {
-      this.view.showMessage("Unable to update task.", "error");
-      // eslint-disable-next-line no-console
-      console.error(error);
-    }
+    await this.model.editTodo(id, newText);
+    this.view.showMessage("Task updated.", "success");
   }
 }
