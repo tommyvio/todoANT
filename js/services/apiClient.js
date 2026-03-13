@@ -68,6 +68,11 @@ export async function fetchTodos() {
  * Even though the remote service does not persist data, we still send
  * the request so that all CRUD operations are exercised.
  *
+ * ⚠️ Known dummyjson limitation: this endpoint always returns the same
+ * fake id (251) regardless of how many todos you create. The model's
+ * addTodo method handles this by replacing the id with a unique local
+ * one when a collision is detected.
+ *
  * @param {string} todoText - Human-readable description of the todo item.
  * @returns {Promise<{id:number,todo:string,completed:boolean,userId:number}>}
  */

@@ -125,9 +125,16 @@ export class TodoModel {
    */
   async addTodo(text) {
     const created = await createTodo(text);
-    // Because the remote API does not persist, we treat this response
-    // as the canonical representation and push it into our array.
-    this.todos = [created, ...this.todos];
+
+    // dummyjson always returns the same fake id (251) for every POST
+    // /todos/add regardless of content. If that id already exists in our
+    // local list we generate a unique timestamp-based id so that two
+    // separately added todos never share the same id and never interfere
+    // with each other when toggling, editing, or deleting.
+    const existingIds = new Set(this.todos.map((t) => t.id));
+    const safeId = existingIds.has(created.id) ? Date.now() : created.id;
+
+    this.todos = [{ ...created, id: safeId }, ...this.todos];
     this.notify();
   }
 

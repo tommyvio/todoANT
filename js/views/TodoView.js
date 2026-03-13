@@ -53,14 +53,20 @@ export class TodoView {
       }
     });
 
-    // Event delegation on the pending list.
+    // Event delegation on the pending list:
+    // Instead of attaching a listener to every button inside the list,
+    // we attach ONE listener to the list container. When any button is
+    // clicked the event bubbles up to this listener, which then inspects
+    // the event target to figure out which button and which todo was
+    // involved. This is more efficient and works even for dynamically
+    // added items.
     this.pendingList.addEventListener("click", (event) => {
       const { action, id } = this.extractActionFromEvent(event);
       if (!action || id == null) return;
       this.routeAction(action, id);
     });
 
-    // Event delegation on the completed list.
+    // Same delegation pattern for the completed list.
     this.completedList.addEventListener("click", (event) => {
       const { action, id } = this.extractActionFromEvent(event);
       if (!action || id == null) return;
@@ -112,15 +118,18 @@ export class TodoView {
    * @param {Array<{id:number,todo:string,completed:boolean,userId:number}>} todos
    */
   renderTodos(todos) {
+    // Clear both columns before re-rendering so stale items are removed.
     this.pendingList.innerHTML = "";
     this.completedList.innerHTML = "";
 
     if (!todos.length) {
+      // Show a friendly placeholder when there is nothing to display.
       this.pendingList.innerHTML =
         '<li class="text-muted">No tasks yet. Add your first one above.</li>';
       return;
     }
 
+    // Sort each todo into the correct column based on its completed flag.
     todos.forEach((todo) => {
       const listElement = this.createTodoListItem(todo);
       if (todo.completed) {
@@ -199,12 +208,16 @@ export class TodoView {
       return { action: null, id: null };
     }
 
+    // Walk up the DOM from the clicked element to find the nearest button
+    // that carries a data-action attribute (toggle / edit / delete).
     const button = target.closest("button[data-action]");
     if (!button) return { action: null, id: null };
 
+    // Walk further up to the <li> that holds the todo's id in data-id.
     const listItem = button.closest(".todo-item");
     if (!listItem) return { action: null, id: null };
 
+    // Convert the string data-id to a number used as the todo identifier.
     const id = Number(listItem.dataset.id);
     const action = button.dataset.action ?? null;
 
