@@ -1,5 +1,7 @@
 # Todo List (MVC)
 
+**Live demo:** https://tommyvio.github.io/todoANT/
+
 A Todo List app built with **Vanilla JavaScript, HTML, and CSS** following the **Model–View–Controller (MVC)** pattern, integrated with the [dummyjson.com](https://dummyjson.com) Todos API.
 
 ## Requirements coverage
