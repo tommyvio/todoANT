@@ -95,11 +95,12 @@ export class TodoModel {
    */
   async loadInitialFromApi() {
     const remoteTodos = await fetchTodos();
-    const mergedById = new Map(remoteTodos.map((todo) => [todo.id, todo]));
-    this.todos.forEach((localTodo) => {
-      mergedById.set(localTodo.id, localTodo);
-    });
-    this.todos = Array.from(mergedById.values());
+    // Keep local todos in their current order (preserves user-defined order
+    // and keeps newly added items at the top). Append any remote todos whose
+    // id is not already present locally so we don't lose API data.
+    const localIds = new Set(this.todos.map((t) => t.id));
+    const newFromRemote = remoteTodos.filter((t) => !localIds.has(t.id));
+    this.todos = [...this.todos, ...newFromRemote];
     this.notify();
   }
 
