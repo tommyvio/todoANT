@@ -21,6 +21,10 @@ import {
 // Key used to store serialized todos inside localStorage.
 const LOCAL_STORAGE_KEY = "mvc-todo-evaluation-list";
 
+// Key used to store the set of IDs the user has explicitly deleted so
+// that the API merge on reload does not re-add them.
+const DELETED_IDS_KEY = "mvc-todo-deleted-ids";
+
 export class TodoModel {
   constructor() {
     /**
@@ -29,6 +33,13 @@ export class TodoModel {
      * { id, todo, completed, userId }.
      */
     this.todos = [];
+
+    /**
+     * Set of todo ids that the user has explicitly deleted.
+     * Persisted in localStorage so deleted items are never re-added
+     * from the remote API after a page reload.
+     */
+    this.deletedIds = new Set();
 
     /**
      * Change subscribers:
@@ -97,9 +108,11 @@ export class TodoModel {
     const remoteTodos = await fetchTodos();
     // Keep local todos in their current order (preserves user-defined order
     // and keeps newly added items at the top). Append any remote todos whose
-    // id is not already present locally so we don't lose API data.
+    // id is not already present locally AND has not been explicitly deleted.
     const localIds = new Set(this.todos.map((t) => t.id));
-    const newFromRemote = remoteTodos.filter((t) => !localIds.has(t.id));
+    const newFromRemote = remoteTodos.filter(
+      (t) => !localIds.has(t.id) && !this.deletedIds.has(t.id)
+    );
     this.todos = [...this.todos, ...newFromRemote];
     this.notify();
   }
@@ -178,6 +191,11 @@ export class TodoModel {
   async deleteTodo(id) {
     // Remove from local state immediately so the UI responds right away.
     this.todos = this.todos.filter((t) => t.id !== id);
+
+    // Record this id so the API merge on next reload does not re-add it.
+    this.deletedIds.add(id);
+    this.saveDeletedIds();
+
     this.notify();
 
     // Fire-and-forget the API call to satisfy the DELETE requirement.
@@ -193,6 +211,38 @@ export class TodoModel {
    *
    * @param {Array} todosSnapshot
    */
+  /**
+   * Persists the current deletedIds set to localStorage.
+   */
+  saveDeletedIds() {
+    try {
+      window.localStorage.setItem(
+        DELETED_IDS_KEY,
+        JSON.stringify([...this.deletedIds])
+      );
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn("Unable to persist deleted ids:", error);
+    }
+  }
+
+  /**
+   * Reads previously deleted IDs from localStorage into this.deletedIds.
+   */
+  loadDeletedIds() {
+    try {
+      const json = window.localStorage.getItem(DELETED_IDS_KEY);
+      if (!json) return;
+      const parsed = JSON.parse(json);
+      if (Array.isArray(parsed)) {
+        this.deletedIds = new Set(parsed);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn("Unable to read deleted ids:", error);
+    }
+  }
+
   saveToLocalStorage(todosSnapshot) {
     try {
       const json = JSON.stringify(todosSnapshot);
@@ -220,5 +270,9 @@ export class TodoModel {
       // eslint-disable-next-line no-console
       console.warn("Unable to read todos from localStorage:", error);
     }
+
+    // Always load deleted IDs alongside todos so the API merge step
+    // can correctly exclude previously deleted items.
+    this.loadDeletedIds();
   }
 }
