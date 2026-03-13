@@ -1,33 +1,29 @@
 # Todo List (MVC)
 
-This repository implements a Todo List app using **Vanilla JavaScript, HTML, and CSS** with a clear **Model–View–Controller (MVC)** structure and the **dummyjson.com** Todos API.
+A Todo List app built with **Vanilla JavaScript, HTML, and CSS** following the **Model–View–Controller (MVC)** pattern, integrated with the [dummyjson.com](https://dummyjson.com) Todos API.
 
-## How the app maps to the requirements
+## Requirements coverage
 
-- **MVC pattern**: Code is split into `TodoModel`, `TodoView`, and `TodoController` classes under the `js/` directory, plus a small `apiClient` service and `main.js` bootstrap file.
-- **Display two lists**: Pending and Completed tasks are shown in separate columns. Each task can be moved between them using **arrow buttons** (→ mark done / ← move back).
-- **Core features**:
-  - Add new tasks from the input at the top.
-  - Delete tasks using the trash button.
-  - Mark tasks as pending/completed via arrow buttons.
-  - Edit an existing task using the pencil icon, then save or cancel.
-- **HTTP API usage** (dummyjson Todos):
-  - `GET /todos` – initial load of sample tasks.
-  - `POST /todos/add` – adding a new todo.
-  - `PATCH /todos/:id` – updating either `todo` text or `completed` flag.
-  - `DELETE /todos/:id` – deleting a todo.
-  - All todos keep the original **`completed`** property name from the API.
-- **Bonus**:
-  - Todos are mirrored into `localStorage`, so tasks remain after a refresh.
+| Requirement | How it is met |
+|---|---|
+| MVC pattern | `TodoModel`, `TodoView`, `TodoController` — no frameworks used |
+| Two lists | Pending and Completed columns; arrow buttons move tasks between them |
+| Add | Type in the input and press **Enter** or click **Submit** |
+| Delete | Trash button on each task |
+| Mark as pending / complete | Arrow button (→ / ←) on each task |
+| Edit | Pencil button opens inline edit; save with 💾 or **Enter**, cancel with ✖ or **Escape** |
+| Event delegation | One click listener per list container, not one per button |
+| 5 HTTP requests | `GET /todos`, `POST /todos/add`, `PUT /todos/:id` (edit text), `PUT /todos/:id` (toggle), `DELETE /todos/:id` |
+| Bonus – localStorage | All changes are persisted; deleted items are remembered so they never reappear after reload |
 
 ## File structure
 
-- `index.html` – HTML skeleton, input section, and the two list containers.
-- `css/styles.css` – Layout and styling for the header, input area, lists, and buttons.
-- `js/main.js` – Entry point that instantiates the model, view, and controller.
-- `js/services/apiClient.js` – Thin wrapper around the dummyjson Todos endpoints.
-- `js/models/TodoModel.js` – Holds todo data, calls the API, and syncs with `localStorage`.
-- `js/views/TodoView.js` – Renders the lists and raises high-level UI events.
-- `js/controllers/TodoController.js` – Connects the view and model, validates input, and shows feedback messages.
-
- 
+```
+index.html                        ← HTML skeleton and list containers
+css/styles.css                    ← Layout and button styles
+js/main.js                        ← Entry point — wires Model, View, Controller
+js/services/apiClient.js          ← Fetch wrappers for all 5 API endpoints
+js/models/TodoModel.js            ← In-memory state, API calls, localStorage
+js/views/TodoView.js              ← DOM rendering and event delegation
+js/controllers/TodoController.js  ← Connects view events to model actions
+```
