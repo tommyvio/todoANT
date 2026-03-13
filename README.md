@@ -15,6 +15,7 @@ A Todo List app built with **Vanilla JavaScript, HTML, and CSS** following the *
 | Event delegation | One click listener per list container, not one per button |
 | 5 HTTP requests | `GET /todos`, `POST /todos/add`, `PUT /todos/:id` (edit text), `PUT /todos/:id` (toggle), `DELETE /todos/:id` |
 | Bonus – localStorage | All changes are persisted; deleted items are remembered so they never reappear after reload |
+| Duplicate ID handling | DummyJSON always returns the same fake ID when creating todos. If the API returns an ID that already exists in the local list, the model detects the collision and assigns a unique local ID instead |
 
 ## File structure
 
