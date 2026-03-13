@@ -23,8 +23,13 @@ export class TodoController {
       this.view.renderTodos(todos);
     });
 
-    // Initial render using whatever the model currently has loaded.
-    this.view.renderTodos(this.model.getTodos());
+    // If local data already exists, render it immediately.
+    // Otherwise keep the initial "Loading..." placeholder in index.html
+    // until the model notifies after API load succeeds or fails.
+    const initialTodos = this.model.getTodos();
+    if (initialTodos.length > 0) {
+      this.view.renderTodos(initialTodos);
+    }
 
     // Wire view events to controller methods.
     this.view.bindAddTodo(this.handleAddTodo.bind(this));

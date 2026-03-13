@@ -4,14 +4,19 @@
  * It knows how to:
  *   - Load initial todos from dummyjson.com.
  *   - Apply changes to the in-memory list when the controller asks.
- *   - Call the API client so that GET/POST/PATCH/DELETE requests are
+ *   - Call the API client so that GET/POST/PUT/DELETE requests are
  *     actually performed.
  *   - Persist the current list into localStorage as an optional bonus.
  *
  * The model does NOT know anything about how todos are displayed.
  */
 
-import { fetchTodos, createTodo, patchTodo, deleteTodo } from "../services/apiClient.js";
+import {
+  fetchTodos,
+  createTodo,
+  updateTodo,
+  deleteTodo,
+} from "../services/apiClient.js";
 
 // Key used to store serialized todos inside localStorage.
 const LOCAL_STORAGE_KEY = "mvc-todo-evaluation-list";
@@ -50,6 +55,8 @@ export class TodoModel {
       // can read.
       // eslint-disable-next-line no-console
       console.error("Failed to load todos from API:", error);
+      // Let subscribers leave the loading state even when API fails.
+      this.notify();
     });
   }
 
@@ -82,14 +89,17 @@ export class TodoModel {
   }
 
   /**
-   * Loads initial todos from the remote API and merges them into the
-   * current state. Any locally persisted items remain at the bottom of
-   * the list while the freshly fetched ones appear first.
+   * Loads initial todos from the remote API and merges them with local
+   * state without duplicating entries that share the same id.
+   * Local values win for matching ids so user edits survive refresh.
    */
   async loadInitialFromApi() {
     const remoteTodos = await fetchTodos();
-    // Prepend remote todos so we can easily see that the GET worked.
-    this.todos = [...remoteTodos, ...this.todos];
+    const mergedById = new Map(remoteTodos.map((todo) => [todo.id, todo]));
+    this.todos.forEach((localTodo) => {
+      mergedById.set(localTodo.id, localTodo);
+    });
+    this.todos = Array.from(mergedById.values());
     this.notify();
   }
 
@@ -109,7 +119,7 @@ export class TodoModel {
 
   /**
    * Toggles the "completed" flag on a todo and mirrors that change to
-   * the PATCH /todos/:id endpoint.
+   * the PUT /todos/:id endpoint.
    *
    * @param {number} id - Identifier of the todo to toggle.
    * @returns {Promise<void>}
@@ -119,7 +129,7 @@ export class TodoModel {
     if (!current) return;
 
     const updatedCompleted = !current.completed;
-    await patchTodo(id, { completed: updatedCompleted });
+    await updateTodo(id, { completed: updatedCompleted });
 
     this.todos = this.todos.map((t) =>
       t.id === id ? { ...t, completed: updatedCompleted } : t
@@ -128,7 +138,7 @@ export class TodoModel {
   }
 
   /**
-   * Updates the text of a todo and performs a PATCH request to keep
+   * Updates the text of a todo and performs a PUT request to keep
    * the remote API in sync for this evaluation.
    *
    * @param {number} id - Identifier of the todo to edit.
@@ -136,7 +146,7 @@ export class TodoModel {
    * @returns {Promise<void>}
    */
   async editTodo(id, newText) {
-    await patchTodo(id, { todo: newText });
+    await updateTodo(id, { todo: newText });
 
     this.todos = this.todos.map((t) =>
       t.id === id ? { ...t, todo: newText } : t

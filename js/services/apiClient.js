@@ -87,19 +87,19 @@ export async function createTodo(todoText) {
 }
 
 /**
- * Updates an existing todo using PATCH /todos/:id.
- * This function accepts a partial object so the caller can update only
- * specific fields such as the "completed" status or "todo" text.
+ * Updates an existing todo using PUT /todos/:id.
+ * The assignment mentions PUT for updates, so this helper uses PUT
+ * while still allowing the caller to send only the fields it needs.
  *
  * @param {number} id - Identifier of the todo that should be updated.
  * @param {Partial<{todo:string,completed:boolean}>} updatedFields - Fields to change.
  * @returns {Promise<{id:number,todo:string,completed:boolean,userId:number}>}
  */
-export async function patchTodo(id, updatedFields) {
+export async function updateTodo(id, updatedFields) {
   const body = JSON.stringify(updatedFields);
 
   const updated = await performJsonRequest(buildUrl(`/todos/${id}`), {
-    method: "PATCH",
+    method: "PUT",
     body,
   });
 
