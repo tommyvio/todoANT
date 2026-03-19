@@ -15,6 +15,7 @@ export class TodoView {
     // Cache static DOM elements that never change.
     this.input = document.getElementById("new-todo-input");
     this.addButton = document.getElementById("add-todo-button");
+    this.sortButton = document.getElementById("sort-button");
     this.feedback = document.getElementById("feedback-message");
     this.pendingList = document.getElementById("pending-list");
     this.completedList = document.getElementById("completed-list");
@@ -28,6 +29,7 @@ export class TodoView {
     this.handleToggle = () => {};
     this.handleDelete = () => {};
     this.handleEdit = () => {};
+    this.handleSort = () => {};
 
     this.attachStaticListeners();
   }
@@ -72,6 +74,11 @@ export class TodoView {
       if (!action || id == null) return;
       this.routeAction(action, id);
     });
+
+    // Sort button: notify the controller and update the button label.
+    this.sortButton.addEventListener("click", () => {
+      this.handleSort();
+    });
   }
 
   /**
@@ -109,6 +116,26 @@ export class TodoView {
    */
   bindEditTodo(handler) {
     this.handleEdit = handler;
+  }
+
+  /**
+   * Allows the controller to subscribe to sort toggle events.
+   * The controller decides the sort direction and updates the button label
+   * by calling updateSortButton().
+   *
+   * @param {() => void} handler
+   */
+  bindSortTodos(handler) {
+    this.handleSort = handler;
+  }
+
+  /**
+   * Updates the sort button label to reflect the current sort state.
+   *
+   * @param {boolean} isSorted - true when list is currently sorted A→Z.
+   */
+  updateSortButton(isSorted) {
+    this.sortButton.textContent = isSorted ? "Sort Z→A" : "Sort A→Z";
   }
 
   /**

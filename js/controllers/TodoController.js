@@ -18,9 +18,16 @@ export class TodoController {
     this.model = model;
     this.view = view;
 
-    // Every time the model's todo list changes, ask the view to render.
+    /**
+     * Tracks whether the lists are currently sorted A→Z.
+     * This is display-only — the model's stored order is never changed.
+     */
+    this.isSorted = false;
+
+    // Every time the model's todo list changes, re-render respecting the
+    // current sort state so the order stays consistent after add/delete/edit.
     this.model.subscribe((todos) => {
-      this.view.renderTodos(todos);
+      this.view.renderTodos(this.applySortOrder(todos));
     });
 
     // If local data already exists, render it immediately.
@@ -28,7 +35,7 @@ export class TodoController {
     // until the model notifies after API load succeeds or fails.
     const initialTodos = this.model.getTodos();
     if (initialTodos.length > 0) {
-      this.view.renderTodos(initialTodos);
+      this.view.renderTodos(this.applySortOrder(initialTodos));
     }
 
     // Wire view events to controller methods.
@@ -36,6 +43,29 @@ export class TodoController {
     this.view.bindToggleTodo(this.handleToggleTodo.bind(this));
     this.view.bindDeleteTodo(this.handleDeleteTodo.bind(this));
     this.view.bindEditTodo(this.handleEditTodo.bind(this));
+    this.view.bindSortTodos(this.handleSortTodos.bind(this));
+  }
+
+  /**
+   * Returns a copy of the todos array sorted alphabetically if isSorted
+   * is true, or in the original model order if false.
+   *
+   * @param {Array} todos
+   * @returns {Array}
+   */
+  applySortOrder(todos) {
+    if (!this.isSorted) return todos;
+    return [...todos].sort((a, b) => a.todo.localeCompare(b.todo));
+  }
+
+  /**
+   * Toggles alphabetical sort on/off and re-renders both lists.
+   * The model's stored order is never modified.
+   */
+  handleSortTodos() {
+    this.isSorted = !this.isSorted;
+    this.view.updateSortButton(this.isSorted);
+    this.view.renderTodos(this.applySortOrder(this.model.getTodos()));
   }
 
   /**
